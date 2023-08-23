@@ -27,6 +27,11 @@ the output for documentation purposes.
 
 Create a local Pyenv using `python -m venv .venv` and `source .venv/bin/activate` on OSX
 
+### Testing URLs
+
+The recommended method for testing JSON served at a URL, is running a local python server 
+using `python3 -m http.server` and serving test json files at a known location, configured in the .ini file.
+
 #### Docker
 
     docker run --publish=7474:7474 --publish=7687:7687 neo4j

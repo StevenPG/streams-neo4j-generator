@@ -1,5 +1,7 @@
 from py2neo import Node, Relationship
 
+from app.remote_binding import get_remote_binding_json
+
 OUT = "out"
 IN = "in"
 consumed_by = "CONSUMED_BY"
@@ -32,9 +34,9 @@ class BindingsManager:
         :return:
         """
         if binding_type == OUT:
-            return consumed_by
-        elif binding_type == IN:
             return produces_to
+        elif binding_type == IN:
+            return consumed_by
         else:
             return unknown_relation
 
@@ -63,6 +65,33 @@ class BindingsManager:
             })
             return binding_node, Relationship(*[node, unknown_relation, binding_node])
 
+    def process_http_bindings(self, binding_urls, node) -> (list, list):
+        """
+        Parse and process HTTP bindings for input and outputs
+        :param binding_urls: incoming list of urls that contain JSON bindings to be parsed and processed
+        :param node: node these bindings are mapped from/to
+        :return: list of nodes and relationships
+        """
+        stream_bindings = get_remote_binding_json(binding_urls)
+
+        # TODO - merge duplication
+        nodes = []
+        relationships = []
+
+        for binding in stream_bindings:
+            if binding is None:
+                # If we found a null binding, just skip processing
+                continue
+
+            destination = str(binding[1])
+            binding_type = BindingsManager.get_binding_type(binding[0])
+
+            binding_node, relationship = self.get_relationship(destination, binding_type, node)
+            nodes.append(binding_node)
+            relationships.append(relationship)
+
+        return nodes, relationships
+
     def process_bindings(self, stream_bindings, node) -> (list, list):
         """
         Receive a list of stream bindings in tuple format and process into a binding node and relationships
@@ -71,6 +100,7 @@ class BindingsManager:
         :param node: the source of this data that will be half of the mapped binding relationship
         :return:
         """
+        # TODO - merge duplication
         nodes = []
         relationships = []
 

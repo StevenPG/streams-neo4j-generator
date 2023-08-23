@@ -29,7 +29,8 @@ class ScannerConfiguration:
             git_url = section_under_append['git_url']
             csv_files = section_under_append['scan_files'].split(',')
             binding_urls = section_under_append['remote_urls'].split(',')
-            self.repositories.append(RepositoryConfiguration(section_name, git_url, csv_files, binding_urls))
+            prefer_url = section_under_append['ignore_git_if_url_found']
+            self.repositories.append(RepositoryConfiguration(section_name, git_url, csv_files, binding_urls, prefer_url))
         except KeyError:
             print("Invalid section provided, ignoring")
 
@@ -113,8 +114,6 @@ def get_bindings(parsed_files) -> (list, list):
     for parsed_file in parsed_files:
         cloud_stream_bindings.append(parse_stream_bindings(parsed_file))
         kafka_stream_bindings.append(parse_kafka_stream_bindings(parsed_file))
-    print(f'Found {len(cloud_stream_bindings)} cloud stream bindings')
-    print(f'Found {len(kafka_stream_bindings)} kafka streams bindings')
 
     return cloud_stream_bindings, kafka_stream_bindings
 
