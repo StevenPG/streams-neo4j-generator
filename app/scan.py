@@ -82,7 +82,7 @@ def parse_stream_bindings(parsed_file):
         for binding_dict in list(binding_dicts.items()):
             return binding_dict
     except KeyError:
-        # If we get a keyerror, this file doesn't have spring.cloud.stream.bindings, so we ignore it
+        # If we get a KeyError, this file doesn't have spring.cloud.stream.bindings, so we ignore it
         # TODO - need to refactor how this is processed by checking existence before retrieval
         pass
 
