@@ -6,8 +6,6 @@ from ini_config import scan_configuration
 from repository import RepositoryManager
 from scan import parse_yaml, search_files, get_bindings
 
-bindings_data = {}
-
 if __name__ == '__main__':
     configuration = scan_configuration()
 
