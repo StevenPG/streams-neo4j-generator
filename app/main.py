@@ -1,4 +1,4 @@
-from py2neo import Node, Relationship
+from py2neo import Node
 
 from app.components import BindingsManager
 from app.graph import build_neo4j_db, DatabaseManager
