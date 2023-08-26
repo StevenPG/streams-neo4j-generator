@@ -50,16 +50,20 @@ class BindingsManager:
         """
         relationship_type = self.binding_type_to_relationship_type(binding_type)
         if relationship_type == consumed_by:
+            # TODO - if there's an existing topic node, we need to use that one
+            # TODO - make a getOrCreate node using the name
             binding_node = Node(*["Topic"], **{
                 "name": destination
             })
             return binding_node, Relationship(*[binding_node, consumed_by, node])
         elif relationship_type == produces_to:
+            # TODO - if there's an existing topic node, we need to use that one
             binding_node = Node(*["Topic"], **{
                 "name": destination
             })
             return binding_node, Relationship(*[node, produces_to, binding_node])
         else:
+            # TODO - if there's an existing topic node, we need to use that one
             binding_node = Node(*["Topic"], **{
                 "name": destination
             })
