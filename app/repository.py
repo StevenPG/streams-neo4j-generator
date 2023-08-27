@@ -34,11 +34,12 @@ class RepositoryConfiguration:
     Internal representation of all the relevant information for a given repository
     """
 
-    def __init__(self, name: str, git_url: str, files: list, binding_urls: list):
+    def __init__(self, name: str, git_url: str, files: list, binding_urls: list, prefer_url: bool):
         self.name = name
         self.git_url = git_url
         self.files = files
         self.binding_urls = binding_urls
+        self.prefer_url = prefer_url
 
     def __str__(self):
         return f'{self.name} @ {self.git_url}'

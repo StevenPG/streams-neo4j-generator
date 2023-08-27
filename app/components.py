@@ -1,5 +1,7 @@
 from py2neo import Node, Relationship
 
+from app.remote_binding import get_remote_binding_json
+
 OUT = "out"
 IN = "in"
 consumed_by = "CONSUMED_BY"
@@ -8,6 +10,9 @@ unknown_relation = "---"
 
 
 class BindingsManager:
+
+    def __init__(self, database_manager):
+        self.database_manager = database_manager
 
     @staticmethod
     def get_binding_type(binding_string):
@@ -32,9 +37,9 @@ class BindingsManager:
         :return:
         """
         if binding_type == OUT:
-            return consumed_by
-        elif binding_type == IN:
             return produces_to
+        elif binding_type == IN:
+            return consumed_by
         else:
             return unknown_relation
 
@@ -48,20 +53,41 @@ class BindingsManager:
         """
         relationship_type = self.binding_type_to_relationship_type(binding_type)
         if relationship_type == consumed_by:
-            binding_node = Node(*["Topic"], **{
-                "name": destination
-            })
+            binding_node = self.database_manager.add_or_get_topic_node("Topic", destination)
             return binding_node, Relationship(*[binding_node, consumed_by, node])
         elif relationship_type == produces_to:
-            binding_node = Node(*["Topic"], **{
-                "name": destination
-            })
+            binding_node = self.database_manager.add_or_get_topic_node("Topic", destination)
             return binding_node, Relationship(*[node, produces_to, binding_node])
         else:
-            binding_node = Node(*["Topic"], **{
-                "name": destination
-            })
+            binding_node = self.database_manager.add_or_get_topic_node("Topic", destination)
             return binding_node, Relationship(*[node, unknown_relation, binding_node])
+
+    def process_http_bindings(self, binding_urls, node) -> (list, list):
+        """
+        Parse and process HTTP bindings for input and outputs
+        :param binding_urls: incoming list of urls that contain JSON bindings to be parsed and processed
+        :param node: node these bindings are mapped from/to
+        :return: list of nodes and relationships
+        """
+        stream_bindings = get_remote_binding_json(binding_urls)
+
+        # TODO - merge duplication
+        nodes = []
+        relationships = []
+
+        for binding in stream_bindings:
+            if binding is None:
+                # If we found a null binding, just skip processing
+                continue
+
+            destination = str(binding[1])
+            binding_type = BindingsManager.get_binding_type(binding[0])
+
+            binding_node, relationship = self.get_relationship(destination, binding_type, node)
+            nodes.append(binding_node)
+            relationships.append(relationship)
+
+        return nodes, relationships
 
     def process_bindings(self, stream_bindings, node) -> (list, list):
         """
@@ -71,6 +97,7 @@ class BindingsManager:
         :param node: the source of this data that will be half of the mapped binding relationship
         :return:
         """
+        # TODO - merge duplication
         nodes = []
         relationships = []
 
