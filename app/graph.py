@@ -1,6 +1,8 @@
 import py2neo
 from py2neo import Graph, ConnectionUnavailable, Node
 
+from app.repository import RepositoryConfiguration
+
 
 class DatabaseManager:
     """
@@ -11,9 +13,6 @@ class DatabaseManager:
     def __init__(self):
         self.nodes = []
         self.relationships = []
-
-    def add_service_node(self, repository):
-        self.add_node(Node(*["Service"], **{"name": repository.name}))
 
     def add_node(self, node):
         self.nodes.append(node)
@@ -29,9 +28,23 @@ class DatabaseManager:
         for relationship in relationships:
             self.add_relationship(relationship)
 
-    def add_nodes_relationships(self, nodes: list, relationships: list):
-        self.add_nodes(nodes)
-        self.add_relationships(relationships)
+    def add_or_get_node(self, node_type: str, repository: RepositoryConfiguration):
+        for node in self.nodes:
+            # If we never find the node-name match, we add and return a new node
+            if repository.name == node['name']:
+                return node
+        created_node = Node(*[node_type], **{"name": repository.name})
+        self.add_node(created_node)
+        return created_node
+
+    def add_or_get_topic_node(self, node_type: str, destination: str):
+        for node in self.nodes:
+            # If we never find the node-name match, we add and return a new node
+            if destination == node['name']:
+                return node
+        created_node = Node(*[node_type], **{"name": destination})
+        self.add_node(created_node)
+        return created_node
 
 
 def build_neo4j_db(manager: DatabaseManager):
