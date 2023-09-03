@@ -1,0 +1,9 @@
+server:
+  port: 8882
+spring:
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers:
+            kafka0:29092

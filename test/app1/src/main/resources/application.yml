@@ -1,0 +1,13 @@
+server:
+  port: 8881
+spring:
+  cloud:
+    stream:
+      bindings:
+        initialPublisher-out-0:
+          destination: topic.first
+      kafka:
+        binder:
+          brokers: kafka0:29092
+    function:
+      definition: initialPublisher
